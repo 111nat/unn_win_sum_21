@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include <string>
 #include <stack>
+#include <vector>
+#include <queue>
 using namespace std;
 
 //for work with file
@@ -933,61 +935,1473 @@ public:
 	}
 };
 
+//int middle(int a, int b)
+//{
+//	return (b - a) / 2 + a;
+//}
+
+vector<int> balanc(int length)
+{
+	bool len;
+	if (length % 2)
+	{
+		len = true;
+		length = length + 1;
+	}
+	else
+	{
+		len = false;
+	}
+	vector<int> returner;
+	vector<int> prev;
+	for (int i = 1; i < length; i++)
+	{
+		prev.push_back(i);
+	}
+	
+	int mid = prev.size();
+	bool tr = true;
+	
+	while (!prev.empty())
+	{
+		mid = prev.size() % 2 ? prev.size()/2 + 1 : prev.size()/2;
+		if (prev.size() % 2 == 1)
+		{
+			while (prev.front() != prev.at(mid - 1))
+			{
+				if (tr)
+				{
+					returner.push_back(*(prev.begin() + mid - 1));
+					tr = false;
+					mid = (prev.size() / 2) % 2 ? prev.size() / 2 / 2 + 1 : prev.size() / 2 / 2;
+					//prev.erase((prev.begin() + mid - 1));
+				}
+				else
+				{
+					returner.push_back(*(prev.begin() + mid - 1));
+					returner.push_back(*(prev.begin() + prev.size() - 1 - mid + 1));
+					mid = mid % 2 ? mid / 2 + 1 : mid / 2;
+				}
+
+			}
+		}
+		else
+		{
+			bool tr2 = true;
+
+			while (prev.front() != prev.at(mid - 1))
+			{
+				if (tr2)
+				{
+					returner.push_back(*(prev.begin() + mid - 1 - 1));
+					returner.push_back(*(prev.begin() + prev.size() - 1 - mid + 1 + 1));
+					mid = mid % 2 ? mid / 2 + 1 : mid / 2;
+					tr2 = false;
+				}
+				else
+				{
+					returner.push_back(*(prev.begin() + mid - 1));
+					returner.push_back(*(prev.begin() + prev.size() - 1 - mid + 1));
+					mid = mid % 2 ? mid / 2 + 1 : mid / 2;
+				}
+			}
+		}
+		
+		if(*(prev.begin() + prev.size() - 1 - mid + 1) == returner.back())
+		{ }
+		else
+		{
+			returner.push_back(*(prev.begin() + mid - 1));
+			returner.push_back(*(prev.begin() + prev.size() - 1 - mid + 1));
+		}
+
+		for (int i = 0; i < returner.size(); i++)
+		{
+			for (int j = 0; j < prev.size(); j++)
+			{
+				if (returner[i] == prev[j])
+				{
+					prev.erase(prev.begin() + j );
+					break;
+				}
+			}
+		}
+	}
+
+	if (len)
+	{
+		for (int i = 0; i < returner.size(); i++)
+		{
+			if (returner[i] == length - 1)
+			{
+				returner.erase(returner.begin() + i);
+			}
+		}
+	}
+
+	for (int i = 0; i < returner.size(); i++)
+	{
+		cout << returner[i] << " ";
+	}
+
+	return returner;
+}
+
+class TTreeNode : public TSortTable
+{
+	class Node
+	{
+	public:
+		Node* left;
+		Node* right;
+		string data;	
+		Node(string data = string(), Node* left = NULL, Node* right = NULL)
+		{
+			this->data = data;
+			this->left = left;
+			this->right = right;
+			
+		};
+	};
+	Node* Head;
+
+	void rule(string person)
+	{
+		string true_person = string();
+		for (int i = 0; i < person.length(); i++)
+		{
+			if (person[i] == '\t')
+			{
+				break;
+			}
+			true_person.push_back(person[i]);
+		}
+		//person = true_person;
+
+		if (Head == NULL)
+		{
+			Head = new Node(person);
+		}
+		else
+		{
+			Node* current = Head;
+			Node* prev = Head;
+			queue<bool> path_prev;
+			
+			string data = string();
+
+
+			while (current != NULL)
+			{
+				data = string();
+				for (int i = 0; i < current->data.length(); i++)
+				{
+					if (current->data[i] == '\t')
+					{
+						break;
+					}
+					data.push_back(current->data[i]);
+				}
+
+				if (true_person >= data)
+				{
+					current = current->right;
+					path_prev.push(true);
+				}
+				else
+				{
+					current = current->left;
+					path_prev.push(false);
+				}
+			}
+
+			while (path_prev.size() != 1)
+			{
+				if (path_prev.front())
+				{
+					path_prev.pop();
+					prev = prev->right;
+				}
+				else
+				{
+					path_prev.pop();
+					prev = prev->left;
+				}
+			}
+
+			if (path_prev.front())
+			{
+				prev->right = new Node(person);
+			}
+			else
+			{
+				prev->left = new Node(person);
+			}
+		}
+	}
+
+public:
+	TTreeNode(string path) : TSortTable(path)
+	{
+		/*string subjects = string();
+		for (int i = 0; i < ammountTableColumns; i++)
+		{
+			subjects = subjects + tableMatrix[0][i];
+		}
+		subjects += '\n';*/
+
+		vector<int> order = balanc(stringCount);
+		cout << endl;
+
+		while (!order.empty())
+		{
+			int number = order.front();
+			order.erase(order.begin());
+			string person = string();
+
+			for (int i = 0; i < ammountTableColumns; i++)
+			{
+				person = person + tableMatrix[number][i];
+				person += '\t';
+			}
+
+			rule(person);
+		}
+	}
+
+	~TTreeNode()
+	{
+		Node* current = Head;
+		Node* prev = Head;
+		queue<bool> prev_path;
+		while (Head->left != NULL)
+		{
+			current = Head;
+			prev = Head;
+			while (!prev_path.empty())
+			{
+				prev_path.pop();
+			}
+
+			while (current->left != NULL || current->right != NULL)
+			{
+				while (current->left != NULL)
+				{
+					current = current->left;
+					prev_path.push(false);
+				}
+				while (current->right != NULL)
+				{
+					current = current->right;
+					prev_path.push(true);
+				}
+			}
+			delete current;
+			
+
+			while (prev_path.size() != 1)
+			{
+				if (prev_path.front())
+				{
+					prev_path.pop();
+					prev = prev->right;
+				}
+				else
+				{
+					prev_path.pop();
+					prev = prev->left;
+				}
+			}
+
+			if (prev_path.front())
+			{
+				prev->right = NULL;
+			}
+			else
+			{
+				prev->left = NULL;
+			}
+
+
+		}
+
+		while (Head->right != NULL)
+		{
+			current = Head;
+			prev = Head;
+			while (!prev_path.empty())
+			{
+				prev_path.pop();
+			}
+
+			while (current->left != NULL || current->right != NULL)
+			{
+				while (current->right != NULL)
+				{
+					current = current->right;
+					prev_path.push(true);
+				}
+
+				while (current->left != NULL)
+				{
+					current = current->left;
+					prev_path.push(false);
+				}
+			}
+			delete current;
+			
+
+			while (prev_path.size() != 1)
+			{
+				if (prev_path.front())
+				{
+					prev_path.pop();
+					prev = prev->right;
+				}
+				else
+				{
+					prev_path.pop();
+					prev = prev->left;
+				}
+			}
+
+			if (prev_path.front())
+			{
+				prev->right = NULL;
+			}
+			else
+			{
+				prev->left = NULL;
+			}
+		}
+
+		current = Head;
+		delete Head;
+		Head = NULL;
+		
+	}
+
+	string finder(string key) override
+	{
+		string data;
+
+		string subject = string();
+		for (int i = 0; i < ammountTableColumns; i++)
+		{
+			subject += tableMatrix[0][i];
+			subject += '\t';
+		}
+		subject += '\n';
+
+		if (key[0] >= '0' && key[0] <= '9')
+		{
+			string help = string();
+			help.push_back(key[0]);
+			int goNext = stoi(help);
+			key.erase(0, 1);
+
+			Node* current = Head;
+
+			while (current != NULL)
+			{
+				data = string();
+				for (int i = 0; i < current->data.length(); i++)
+				{
+					if (current->data[i] == '\t')
+					{
+						break;
+					}
+					data.push_back(current->data[i]);
+				}
+
+				if (key == data)
+				{
+					if (goNext != 0)
+					{
+						goNext--;
+					}
+					else
+					{
+						return subject + current->data;
+					}
+				}
+
+				if (key > data)
+				{
+					current = current->right;
+				}
+				else
+				{
+					current = current->left;
+				}
+			}
+			cout << "Нет такого ФИО (цифра)" << endl;
+			return string();
+		}
+		else
+		{
+			Node* current = Head;
+
+			while (current != NULL)
+			{
+				data = string();
+				for (int i = 0; i < current->data.length(); i++)
+				{
+					if (current->data[i] == '\t')
+					{
+						break;
+					}
+					data.push_back(current->data[i]);
+				}
+
+				if (key == data)
+				{
+					
+					return subject + current->data;
+					
+				}
+
+				if (key > data)
+				{
+					current = current->right;
+				}
+				else
+				{
+					current = current->left;
+				}
+			}
+			cout << "Нет такого ФИО" << endl;
+			return string();
+		}
+		
+	}
+
+	void inserter(string person, string marksByUser) override
+	{
+		if (marksByUser.length() < (ammountTableColumns - 1) * 2)
+		{
+			cout << "мало оценок: < " << (ammountTableColumns - 1)<< endl;
+			return void();
+		}
+		string marks = string();
+		int i = 0;
+		while (i < marksByUser.length() && i < (ammountTableColumns - 1) * 2)
+		{
+			marks.push_back(marksByUser[i]);
+			if (marks[i] == ' ' )
+			{
+				marks[i] = '|';
+			}
+			i++;
+		}
+		marks.pop_back();
+		string insert_sort = person + '|' + marks;
+		cout << insert_sort << endl;
+		TSortTable::inserter(insert_sort, "line");
+
+		i = 0;
+		marks = string();
+		while (i < marksByUser.length() && i < (ammountTableColumns - 1) * 2)
+		{
+			if (marksByUser[i] == ' ')
+			{
+				marksByUser[i] = '\t';
+			}
+			marks.push_back(marksByUser[i]);
+			i++;
+		}
+		person += '\t';
+		person += marks;
+
+		rule(person);
+	}
+
+	bool deleter(string key) override
+	{
+		TSortTable::deleter(key);
+
+		Node* current = Head;
+		Node* prev = Head;
+		queue<bool> prev_path;
+		if (key[0] >= '0' && key[0] <= '9')
+		{
+			string data = string();
+			string help = string();
+			help.push_back(key[0]);
+			int goNext = stoi(help);
+			key.erase(0, 1);
+
+			while (current != NULL && current->data != key)
+			{
+				data = string();
+				for (int i = 0; i < current->data.length(); i++)
+				{
+					if (current->data[i] == '\t')
+					{
+						break;
+					}
+					data.push_back(current->data[i]);
+				}
+
+				if (key == data)
+				{
+					if (goNext != 0)
+					{
+						goNext--;
+					}
+					else
+					{
+						break;
+					}
+				}
+
+
+				if (key > data)
+				{
+					current = current->right;
+					prev_path.push(true);
+				}
+				else
+				{
+					current = current->left;
+					prev_path.push(false);
+				}
+			}
+
+			if (current == NULL)
+			{
+				cout << "Нет такого ФИО (цифра)" << endl;
+				return false;
+			}
+
+			if (current->left == NULL && current->right == NULL)
+			{
+				delete current;
+
+				while (prev_path.size() != 1)
+				{
+					if (prev_path.front())
+					{
+						prev_path.pop();
+						prev = prev->right;
+					}
+					else
+					{
+						prev_path.pop();
+						prev = prev->left;
+					}
+				}
+
+				if (prev_path.front())
+				{
+					prev->right = NULL;
+				}
+				else
+				{
+					prev->left = NULL;
+				}
+
+				return true;
+			}
+			else if (current->left == NULL || current->right == NULL)
+			{
+
+				while (prev_path.size() != 1)
+				{
+					if (prev_path.front())
+					{
+						prev_path.pop();
+						prev = prev->right;
+					}
+					else
+					{
+						prev_path.pop();
+						prev = prev->left;
+					}
+				}
+
+				if (prev_path.front())
+				{
+					if (current->left != NULL)
+					{
+						prev->right = current->left;
+						delete current;
+					}
+					else
+					{
+						prev->right = current->right;
+						delete current;
+					}
+				}
+				else
+				{
+					if (current->left != NULL)
+					{
+						prev->left = current->left;
+						delete current;
+					}
+					else
+					{
+						prev->left = current->right;
+						delete current;
+					}
+				}
+				return true;
+			}
+			else
+			{
+				Node* swap = current;
+				Node* swapPrev = current;
+				swap = swap->right;
+				if (swap->left != NULL)
+				{
+					swapPrev = swapPrev->right;
+				}
+
+				while (swap->left != NULL)
+				{
+					swap = swap->left;
+					if (swapPrev->left != swap)
+					{
+						swapPrev = swapPrev->left;
+					}
+				}
+				Node* swapLeft = swap->left;
+				Node* swapRight = swap->right;
+
+				Node* currentLeft = current->left;
+				Node* currentRight = current->right;
+
+				while (prev_path.size() != 1)
+				{
+					if (prev_path.front())
+					{
+						prev = prev->right;
+						prev_path.pop();
+					}
+					else
+					{
+						prev = prev->left;
+						prev_path.pop();
+					}
+				}
+
+				if (prev_path.front())
+				{
+					prev->right = swap;
+				}
+				else
+				{
+					prev->left = swap;
+				}
+
+				swap->left = currentLeft;
+				swap->right = current;
+
+
+				if (swapPrev->left == swap)
+				{
+					swapPrev->left = current;
+				}
+				else
+				{
+					//swapPrev->right = current;
+				}
+				current->left = swapLeft;
+				current->right = swapRight;
+
+
+				/*while (!prev_path.empty())
+				{
+					prev_path.pop();
+				}
+				prev = Head;
+				while (prev->data != current->data)
+				{
+					if (key > data)
+					{
+						current = current->right;
+						prev_path.push(true);
+					}
+					else
+					{
+						current = current->left;
+						prev_path.push(false);
+					}
+				}*/
+
+				while (!prev_path.empty())
+				{
+					prev_path.pop();
+				}
+
+				prev = Head;
+
+				while (prev->data != current->data)
+				{
+					if (prev->data > current->data)
+					{
+
+						prev = prev->left;
+						prev_path.push(false);
+					}
+					else
+					{
+						prev = prev->right;
+						prev_path.push(true);
+					}
+				}
+
+				if (current->left == NULL && current->right == NULL)
+				{
+					delete current;
+
+					prev = Head;
+					while (prev_path.size() != 1)
+					{
+						if (prev_path.front())
+						{
+							prev_path.pop();
+							prev = prev->right;
+						}
+						else
+						{
+							prev_path.pop();
+							prev = prev->left;
+						}
+					}
+
+					if (prev_path.front())
+					{
+						prev->right = NULL;
+					}
+					else
+					{
+						prev->left = NULL;
+					}
+
+					return true;
+				}
+				else if (current->left == NULL || current->right == NULL)
+				{
+
+					while (prev_path.size() != 1)
+					{
+						if (prev_path.front())
+						{
+							prev_path.pop();
+							prev = prev->right;
+						}
+						else
+						{
+							prev_path.pop();
+							prev = prev->left;
+						}
+					}
+
+					if (prev_path.front())
+					{
+						if (current->left != NULL)
+						{
+							prev->right = current->left;
+							delete current;
+						}
+						else
+						{
+							prev->right = current->right;
+							delete current;
+						}
+					}
+					else
+					{
+						if (current->left != NULL)
+						{
+							prev->left = current->left;
+							delete current;
+						}
+						else
+						{
+							prev->left = current->right;
+							delete current;
+						}
+					}
+					return true;
+				}
+
+
+			}
+			//else
+			//{
+			//	Node* swap = current;
+			//	queue<bool> swap_path;
+			//	Node* swap_prev = current;
+			//	swap = swap->right;
+			//	swap_path.push(true);
+			//	while (swap->left != NULL)
+			//	{
+			//		swap = swap->left;
+			//		swap_path.push(false);
+			//	}
+			//	
+			//	while (swap_path.size() != 1)
+			//	{
+			//		if (swap_path.front())
+			//		{
+			//			swap_prev = swap_prev->right;
+			//			swap_path.pop();
+			//		}
+			//		else
+			//		{
+			//			swap_prev = swap_prev->left;
+			//			swap_path.pop();
+			//		}
+			//	}
+
+			//	Node* helper;
+			//	Node* helperleft = current->left;
+			//	Node* helperright = current->right;
+
+			//	current->right = swap->right;
+			//	current->left = swap->left;
+
+
+			//	if (swap_path.front())
+			//	{
+			//		swap_prev->right = current;
+			//		swap_path.pop();
+			//	}
+			//	else
+			//	{
+			//		swap_prev->left = current;
+			//		swap_path.pop();
+			//	}
+
+			//	
+
+			//	swap->right = helperright;
+			//	swap->left = helperleft;
+			//	while (prev_path.size() != 1 && !prev_path.empty())
+			//	{
+			//		if (prev_path.front())
+			//		{
+			//			prev->right = current;
+			//			prev_path.pop();
+			//		}
+			//		else
+			//		{
+			//			prev->left = current;
+			//			prev_path.pop();
+			//		}
+			//	}
+
+			//	if (prev_path.front())
+			//	{
+			//		prev->right = swap;
+			//		prev_path.pop();
+			//	}
+			//	else
+			//	{
+			//		prev->left = swap;
+			//		prev_path.pop();
+			//	}
+
+			//	
+			//	//---
+			//	while (!prev_path.empty())
+			//	{
+			//		prev_path.pop();
+			//	}
+			//	prev = Head;
+
+			//	helper = Head;
+
+			//	data = string();
+			//	for (int i = 0; i < current->data.length(); i++)
+			//	{
+			//		if (current->data[i] == '\t')
+			//		{
+			//			break;
+			//		}
+			//		data.push_back(current->data[i]);
+			//	}
+
+			//	string true_person = string();
+
+			//	while (helper->data != current->data)
+			//	{
+			//		true_person = string();
+			//		for (int i = 0; i < helper->data.length(); i++)
+			//		{
+			//			if (helper->data[i] == '\t')
+			//			{
+			//				break;
+			//			}
+			//			true_person.push_back(helper->data[i]);
+			//		}
+
+			//		if (data >= true_person)
+			//		{
+			//			helper = helper->right;
+			//			prev_path.push(true);
+			//		}
+			//		else
+			//		{
+			//			helper = helper->left;
+			//			prev_path.push(false);
+			//		}
+			//	}
+
+
+
+			//	//Node* a = Head;
+
+			//	if (current->left == NULL && current->right == NULL)
+			//	{
+			//		delete current;
+
+			//		while (prev_path.size() != 1)
+			//		{
+			//			if (prev_path.front())
+			//			{
+			//				prev_path.pop();
+			//				prev = prev->right;
+			//			}
+			//			else
+			//			{
+			//				prev_path.pop();
+			//				prev = prev->left;
+			//			}
+			//		}
+
+			//		if (prev_path.front())
+			//		{
+			//			prev->right = NULL;
+			//		}
+			//		else
+			//		{
+			//			prev->left = NULL;
+			//		}
+
+			//		return true;
+			//	}
+			//	else if (current->left == NULL || current->right == NULL)
+			//	{
+
+			//		while (prev_path.size() != 1)
+			//		{
+			//			if (prev_path.front())
+			//			{
+			//				prev_path.pop();
+			//				prev = prev->right;
+			//			}
+			//			else
+			//			{
+			//				prev_path.pop();
+			//				prev = prev->left;
+			//			}
+			//		}
+
+			//		if (prev_path.front())
+			//		{
+			//			if (current->left != NULL)
+			//			{
+			//				prev->right = current->left;
+			//				delete current;
+			//			}
+			//			else
+			//			{
+			//				prev->right = current->right;
+			//				delete current;
+			//			}
+			//		}
+			//		else
+			//		{
+			//			if (current->left != NULL)
+			//			{
+			//				prev->left = current->left;
+			//				delete current;
+			//			}
+			//			else
+			//			{
+			//				prev->left = current->right;
+			//				delete current;
+			//			}
+			//		}
+			//		return true;
+			//	}
+
+			//}
+		}
+		else
+		{
+			string data = string();
+			while (current != NULL)
+			{
+				data = string();
+				for (int i = 0; i < current->data.length(); i++)
+				{
+					if (current->data[i] == '\t')
+					{
+						break;
+					}
+					data.push_back(current->data[i]);
+				}
+
+				if (key == data)
+				{	
+					break;
+				}
+
+				if (key > data)
+				{
+					current = current->right;
+					prev_path.push(true);
+				}
+				else
+				{
+					current = current->left;
+					prev_path.push(false);
+				}
+			}
+
+			if (current == NULL)
+			{
+				cout << "Нет такого ФИО (цифра)" << endl;
+				return false;
+			}
+
+			if (current->left == NULL && current->right == NULL)
+			{
+				delete current;
+
+				while (prev_path.size() != 1)
+				{
+					if (prev_path.front())
+					{
+						prev_path.pop();
+						prev = prev->right;
+					}
+					else
+					{
+						prev_path.pop();
+						prev = prev->left;
+					}
+				}
+
+				if (prev_path.front())
+				{
+					prev->right = NULL;
+				}
+				else
+				{
+					prev->left = NULL;
+				}
+
+				return true;
+			}
+			else if (current->left == NULL || current->right == NULL)
+			{
+
+				while (prev_path.size() != 1)
+				{
+					if (prev_path.front())
+					{
+						prev_path.pop();
+						prev = prev->right;
+					}
+					else
+					{
+						prev_path.pop();
+						prev = prev->left;
+					}
+				}
+
+				if (prev_path.front())
+				{
+					if (current->left != NULL)
+					{
+						prev->right = current->left;
+						delete current;
+					}
+					else
+					{
+						prev->right = current->right;
+						delete current;
+					}
+				}
+				else
+				{
+					if (current->left != NULL)
+					{
+						prev->left = current->left;
+						delete current;
+					}
+					else
+					{
+						prev->left = current->right;
+						delete current;
+					}
+				}
+				return true;
+			}
+			else
+			{
+				Node* swap = current;
+				Node* swapPrev = current;
+				swap = swap->right;
+				if (swap->left != NULL)
+				{
+					swapPrev = swapPrev->right;
+				}
+
+				while (swap->left != NULL)
+				{
+					swap = swap->left;
+					if (swapPrev->left != swap)
+					{
+						swapPrev = swapPrev->left;
+					}
+				}
+				Node* swapLeft = swap->left;
+				Node* swapRight = swap->right;
+
+				Node* currentLeft = current->left;
+				Node* currentRight = current->right;
+
+				while (prev_path.size() != 1)
+				{
+					if (prev_path.front())
+					{
+						prev = prev->right;
+						prev_path.pop();
+					}
+					else
+					{
+						prev = prev->left;
+						prev_path.pop();
+					}
+				}
+
+				if (prev_path.front())
+				{
+					prev->right = swap;
+				}
+				else
+				{
+					prev->left = swap;
+				}
+
+				swap->left = currentLeft;
+				swap->right = current;
+
+
+				if (swapPrev->left == swap)
+				{
+					swapPrev->left = current;
+				}
+				else
+				{
+					//swapPrev->right = current;
+				}
+				current->left = swapLeft;
+				current->right = swapRight;
+
+				while (!prev_path.empty())
+				{
+					prev_path.pop();
+				}
+
+				prev = Head;
+
+				while (prev->data != current->data)
+				{
+					if (prev->data > current->data)
+					{
+
+						prev = prev->left;
+						prev_path.push(false);
+					}
+					else
+					{
+						prev = prev->right;
+						prev_path.push(true);
+					}
+				}
+
+				if (current->left == NULL && current->right == NULL)
+				{
+					delete current;
+
+					prev = Head;
+					while (prev_path.size() != 1)
+					{
+						if (prev_path.front())
+						{
+							prev_path.pop();
+							prev = prev->right;
+						}
+						else
+						{
+							prev_path.pop();
+							prev = prev->left;
+						}
+					}
+
+					if (prev_path.front())
+					{
+						prev->right = NULL;
+					}
+					else
+					{
+						prev->left = NULL;
+					}
+
+					return true;
+				}
+				else if (current->left == NULL || current->right == NULL)
+				{
+
+					while (prev_path.size() != 1)
+					{
+						if (prev_path.front())
+						{
+							prev_path.pop();
+							prev = prev->right;
+						}
+						else
+						{
+							prev_path.pop();
+							prev = prev->left;
+						}
+					}
+
+					if (prev_path.front())
+					{
+						if (current->left != NULL)
+						{
+							prev->right = current->left;
+							delete current;
+						}
+						else
+						{
+							prev->right = current->right;
+							delete current;
+						}
+					}
+					else
+					{
+						if (current->left != NULL)
+						{
+							prev->left = current->left;
+							delete current;
+						}
+						else
+						{
+							prev->left = current->right;
+							delete current;
+						}
+					}
+					return true;
+				}
+
+
+			}
+
+			return bool();
+		}
+	}
+
+	void show()
+	{
+		int size = 0;
+
+		Node* current = Head;
+		Node* prev = Head;
+		queue<bool> prev_path;
+		while (Head->left != NULL)
+		{
+			current = Head;
+			prev = Head;
+			while (!prev_path.empty())
+			{
+				prev_path.pop();
+			}
+
+			while (current->left != NULL || current->right != NULL)
+			{
+				while (current->left != NULL)
+				{
+					current = current->left;
+					prev_path.push(false);
+				}
+				while (current->right != NULL)
+				{
+					current = current->right;
+					prev_path.push(true);
+				}
+			}
+			size++;
+			cout << current->data << endl;
+			delete current;
+
+
+			while (prev_path.size() != 1)
+			{
+				if (prev_path.front())
+				{
+					prev_path.pop();
+					prev = prev->right;
+				}
+				else
+				{
+					prev_path.pop();
+					prev = prev->left;
+				}
+			}
+
+			if (prev_path.front())
+			{
+				prev->right = NULL;
+			}
+			else
+			{
+				prev->left = NULL;
+			}
+
+
+		}
+
+		cout << endl << endl;
+
+		while (Head->right != NULL)
+		{
+			current = Head;
+			prev = Head;
+			while (!prev_path.empty())
+			{
+				prev_path.pop();
+			}
+
+			while (current->left != NULL || current->right != NULL)
+			{
+				while (current->right != NULL)
+				{
+					current = current->right;
+					prev_path.push(true);
+				}
+
+				while (current->left != NULL)
+				{
+					current = current->left;
+					prev_path.push(false);
+				}
+			}
+			size++;
+			cout << current->data << endl;
+			delete current;
+
+
+			while (prev_path.size() != 1)
+			{
+				if (prev_path.front())
+				{
+					prev_path.pop();
+					prev = prev->right;
+				}
+				else
+				{
+					prev_path.pop();
+					prev = prev->left;
+				}
+			}
+
+			if (prev_path.front())
+			{
+				prev->right = NULL;
+			}
+			else
+			{
+				prev->left = NULL;
+			}
+		}
+
+		cout << endl << endl;
+
+
+		current = Head;
+		size++;
+		cout << Head->data << endl;
+		delete Head;
+		Head = NULL;
+		//---
+		size++;
+		vector<int> order = balanc(size);
+		cout << endl;
+
+		while (!order.empty())
+		{
+			int number = order.front();
+			order.erase(order.begin());
+			string person = string();
+
+			for (int i = 0; i < ammountTableColumns; i++)
+			{
+				person = person + tableMatrix[number][i];
+				person += '\t';
+			}
+
+			rule(person);
+		}
+
+	}
+};
+
+
+
+
 int main()
 {
 	setlocale(LC_ALL, "rus");
+
+	
+
 	string path = "oldTable.txt";
 
-	TSortTable table2(path);
+	TTreeNode table3(path);
+
+	//table3.inserter("alex", "1 2 3 ");
+	cout<<table3.finder("Ааранов А.А.")<<endl;
+	table3.deleter("Ааранов А.А.");
+	cout << table3.finder("Ааранов А.А.") << endl;
+
+	cout << endl << endl;
+	table3.show();
+
+
+	//cout<< table3.finder("Баранов А.А.") <<endl;
+
+	//TSortTable table2(path);
+
+	////table2.printMatrix();
+
+	//table2.deleter("Баранов А.А.");
+	//table2.deleter("*Русский язык");
+
+	//table2.deleter("Баранов А.А.");
+	//table2.deleter("Русский язы");
+
+	//table2.finder("*Математика");
+	//table2.finder("Наумов Н.В.");
+
+	//table2.finder("2");
+
+	//table2.inserter("матеша|1|2|3|4|5|6|7|8|9","column");
 
 	//table2.printMatrix();
 
-	table2.deleter("Баранов А.А.");
-	table2.deleter("*Русский язык");
 
-	table2.deleter("Баранов А.А.");
-	table2.deleter("Русский язы");
-
-	table2.finder("*Математика");
-	table2.finder("Наумов Н.В.");
-
-	table2.finder("2");
-
-	table2.inserter("яреяре|1|2|3|4|5|6|7|8|9","column");
-
-	table2.printMatrix();
-
-	//TScanTable table1(path);
-
-
-	//table1.deleter("2");
-	//table1.deleter("Математика");
-
-	//table1.inserter("сергей ф.ф.|5|4|3|2", "line");
-	//table1.inserter("arteml a.q.|1|2|3|4", "line");
-
-	//table1.inserter("proga|1|2|3|4", "column");
-	//table1.inserter("matan|1|2|3|4", "column");
-	//
-	//table1.printMatrix();
-
-	//cout << endl << endl;
-
-	//table1.finder("matan");
-	//cout << endl;
-
-	//table1.finder("ФИО");
-	//cout << endl;
-	//table1.finder("Математика");//net
-	//cout << endl;
-
-	//table1.finder("сергей ф.ф.");
-	//cout << endl;
-
-	//table1.finder("2");
-	//cout << endl;
-
-
+	
+	
 	return 0;
 	
 }
