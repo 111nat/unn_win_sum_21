@@ -125,6 +125,14 @@
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AbstractTable.h" />
+    <ClInclude Include="fileWorker.h" />
+    <ClInclude Include="HashTable.h" />
+    <ClInclude Include="ScanTable.h" />
+    <ClInclude Include="SortTable.h" />
+    <ClInclude Include="TreeTable.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
