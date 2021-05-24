@@ -11,11 +11,13 @@ int main()
 
 	TTreeTable a(path);
 
-	cout << a.finder("Наумов Н.В.") << endl;
+	//cout << a.finder("Наумов Н.В.") << endl;
 
-	a.deleter("Захаров А.А.");
+	//a.deleter("Захаров А.А.");
+	//
+	//cout << a.finder("Захаров А.А.") << endl;
+
 	
-	cout << a.finder("Захаров А.А.") << endl;
 	return 0;
 	
 }

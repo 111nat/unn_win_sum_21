@@ -21,11 +21,6 @@ class TTreeTable : public TScanTable
 			left = right = 0;
 			height = 1;
 		}
-
-		~node()
-		{
-			cout << "yes" << endl;
-		}
 	};
 
 	int height(node* p)
@@ -245,5 +240,117 @@ public:
 	{
 
 		return del(head, key);
+	}
+
+	~TTreeTable()
+	{
+		node* current = head;
+		node* prev = head;
+		queue<bool> prev_path;
+		while (head->left != NULL)
+		{
+			current = head;
+			prev = head;
+			while (!prev_path.empty())
+			{
+				prev_path.pop();
+			}
+
+			while (current->left != NULL || current->right != NULL)
+			{
+				while (current->left != NULL)
+				{
+					current = current->left;
+					prev_path.push(false);
+				}
+				while (current->right != NULL)
+				{
+					current = current->right;
+					prev_path.push(true);
+				}
+			}
+			delete current;
+
+
+			while (prev_path.size() != 1)
+			{
+				if (prev_path.front())
+				{
+					prev_path.pop();
+					prev = prev->right;
+				}
+				else
+				{
+					prev_path.pop();
+					prev = prev->left;
+				}
+			}
+
+			if (prev_path.front())
+			{
+				prev->right = NULL;
+			}
+			else
+			{
+				prev->left = NULL;
+			}
+
+
+		}
+
+		while (head->right != NULL)
+		{
+			current = head;
+			prev = head;
+			while (!prev_path.empty())
+			{
+				prev_path.pop();
+			}
+
+			while (current->left != NULL || current->right != NULL)
+			{
+				while (current->right != NULL)
+				{
+					current = current->right;
+					prev_path.push(true);
+				}
+
+				while (current->left != NULL)
+				{
+					current = current->left;
+					prev_path.push(false);
+				}
+			}
+			delete current;
+
+
+			while (prev_path.size() != 1)
+			{
+				if (prev_path.front())
+				{
+					prev_path.pop();
+					prev = prev->right;
+				}
+				else
+				{
+					prev_path.pop();
+					prev = prev->left;
+				}
+			}
+
+			if (prev_path.front())
+			{
+				prev->right = NULL;
+			}
+			else
+			{
+				prev->left = NULL;
+			}
+		}
+
+		current = head;
+		delete head;
+		head = NULL;
+
 	}
 };
